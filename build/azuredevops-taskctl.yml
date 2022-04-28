@@ -94,10 +94,10 @@ stages:
               env
               taskctl release
           env:
-            BUILDNUMBER: $(Build.BuildNumber)
+            VERSION_NUMBER: $(Build.BuildNumber)
             API_KEY: $(GITHUB_TOKEN)
             NOTES:
             COMMIT_ID: $(Build.SourceVersion)
             ARTIFACTS_DIR: outputs/assets
             OWNER: ${{ variables.RepoOwner }}
-            REPONAME: ${{ variables.RepoName }}
+            REPOSITORY: ${{ variables.RepoName }}

@@ -20,6 +20,8 @@ param (
     $number = ""
 )
 
+dir env:
+
 if (![String]::IsNullOrEmpty($number)) {
     $result = $number
 } else {

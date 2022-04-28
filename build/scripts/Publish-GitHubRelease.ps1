@@ -154,6 +154,8 @@ $releaseArgs = @{
     ErrorAction = "Stop"
 }
 
+$releaseArgs
+
 # Create the release by making the API call, artifacts will be uploaded afterwards
 Write-Output ("Creating release for: {0}" -f $version)
 try {

@@ -35,6 +35,7 @@ stages:
         inputs:
           targetType: inline
           script: |
+            env
             taskctl build
         env:
           BUILDNUMBER: $(Build.BuildNumber)

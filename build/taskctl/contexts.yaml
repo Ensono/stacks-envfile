@@ -4,6 +4,8 @@ contexts:
       bin: docker
       args:
         - run
+        - --env-file
+        - envfile        
         - --rm
         - -v
         - ${PWD}:/app

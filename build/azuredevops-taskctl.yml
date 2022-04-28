@@ -1,0 +1,101 @@
+# Azure DevOps pipeline file using Taskfile as the runner
+# This is so that the main build and tests can be run in the same way
+# on a local machine as well as in the CLI
+
+# Set the name which will define the build number
+name: 0.0$(Rev:.r)
+
+# Set the agent pool that is going to be used for the build
+pool:
+  vmImage: ubuntu-20.04
+
+variables:
+  - template: azuredevops-vars.yml
+
+stages:
+  - stage: Build
+
+    jobs:
+
+    - job: Build
+      steps:
+
+      # Install Taskfile for the build to run
+      - task: Bash@3
+        displayName: Install Taskctl
+        inputs:
+          targetType: inline
+          script: |
+            wget https://github.com/taskctl/taskctl/releases/download/${{ variables.TaskctlVersion }}/taskctl_${{ variables.TaskctlVersion }}_linux_amd64.tar.gz -O /tmp/taskctl.tar.gz
+            tar zxf /tmp/taskctl.tar.gz -C /usr/local/bin taskctl 
+
+      # Run the tasks to build the application
+      - task: Bash@3
+        displayName: Build & Test
+        inputs:
+          targetType: inline
+          script: |
+            taskctl build
+        env:
+          BUILDNUMBER: $(Build.BuildNumber)
+
+      - task: Bash@3
+        displayName: Outputs
+        inputs:
+          targetType: inline
+          script: |
+            tree outputs
+
+      # Upload the binary files
+      - task: PublishBuildArtifacts@1
+        displayName: Publish Binaries
+        inputs:
+          pathToPublish: $(Build.SourcesDirectory)/outputs/bin
+          artifactName: StacksEnvFile    
+
+  - stage: Release
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+
+    variables:
+      - group: amido-stacks-webapp
+
+    jobs:
+
+    - job: CreateGHRelease
+
+      steps:
+        # Download the necessary artifacts from the previous stage
+
+        - task: DownloadPipelineArtifact@2
+          inputs:
+            artifact: 'StacksEnFile'
+            path: $(Build.SourcesDirectory)/outputs/assets
+            patterns: |
+              **
+              !**/*inttest*
+
+        # Install Taskfile for the build to run
+        - task: Bash@3
+          displayName: Install Taskctl
+          inputs:
+            targetType: inline
+            script: |
+              wget https://github.com/taskctl/taskctl/releases/download/${{ variables.TaskctlVersion }}/taskctl_${{ variables.TaskctlVersion }}_linux_amd64.tar.gz -O /tmp/taskctl.tar.gz
+              tar zxf /tmp/taskctl.tar.gz -C /usr/local/bin taskctl 
+
+        # Run the tasks to build the application
+        - task: Bash@3
+          displayName: Release
+          inputs:
+            targetType: inline
+            script: |
+              taskctl release
+          env:
+            BUILDNUMBER: $(Build.BuildNumber)
+            API_KEY: $(GITHUB_TOKEN)
+            NOTES:
+            COMMIT_ID: $(Build.SourceVersion)
+            ARTIFACTS_DIR: outputs/assets
+            OWNER: ${{ variables.RepoOwner }}
+            REPONAME: ${{ variables.RepoName }}

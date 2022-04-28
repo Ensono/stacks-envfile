@@ -1,0 +1,20 @@
+contexts:
+  buildenv:
+    executable:
+      bin: docker
+      args:
+        - run
+        - --rm
+        - -v
+        - ${PWD}:/app
+        - -v
+        - /var/run/docker.sock:/var/run/docker.sock
+        - -e
+        - PSModulePath=/modules
+        - -w
+        - /app
+        - amidostacks/runner-pwsh-golang:0.3.54-versionbump
+        - pwsh
+        - -NoProfile
+        - -Command
+    quote: "'"

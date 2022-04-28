@@ -1,0 +1,29 @@
+tasks:
+
+  clean:
+    description: Clean the output directory
+    command:
+      - rm -rf outputs
+
+  buildnumber:
+    context: buildenv
+    command:
+      - /app/build/scripts/Set-BuildNumber.ps1 $BUILDNUMBER
+    exportAs: BUILDNUMBER
+
+  _compile:
+    description: Compile CLI and Integration Tests
+    context: buildenv
+    command:
+      - /app/build/scripts/Invoke-Compile.ps1 -BuildNumber $BUILDNUMBER
+
+  _release:
+    context: buildenv
+    command:
+      - /app/build/scripts/Publish-GitHubRelease.ps1 -version $BUILDNUMBER -commitId $COMMIT_ID -apikey $API_KEY -artifactsDir $ARTIFACTS_DIR -Owner $OWNER -repository $REPONAME
+    env:
+      VERSION_NUMBER: $BUILDNUMBER
+      API_KEY: $API_KEY
+      COMMIT_ID: $COMMIT_ID
+      ARTIFACTS_DIR: $ARTIFACTS_DIR
+      REPONAME: $REPONAME      

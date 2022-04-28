@@ -60,6 +60,7 @@ stages:
 
     variables:
       - group: amido-stacks-webapp
+      - group: amido-stacks-github-credentials
 
     jobs:
 
@@ -95,7 +96,7 @@ stages:
               taskctl release
           env:
             VERSION_NUMBER: $(Build.BuildNumber)
-            API_KEY: $(GITHUB_TOKEN)
+            API_KEY: $(API_KEY)
             NOTES:
             COMMIT_ID: $(Build.SourceVersion)
             ARTIFACTS_DIR: outputs/assets

@@ -74,7 +74,7 @@ func main() {
 
 		// split the environment variable using = as the delimiter
 		// this is so that newlines can be surpressed
-		parts := strings.Split(env, "=")
+		parts := strings.SplitN(env, "=", 2)
 
 		// Get the name of the variable
 		name := parts[0]

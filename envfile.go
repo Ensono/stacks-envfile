@@ -95,7 +95,7 @@ func main() {
 		value := strings.Replace(parts[1], "\n", replaceCharacter, -1)
 
 		// If the value has spaces in it then quote it
-		if spacePattern.MatchString(value) {
+		if spacePattern.MatchString(value) && quote {
 			value = fmt.Sprintf("\"%s\"", value)
 		}
 

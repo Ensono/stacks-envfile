@@ -25,8 +25,6 @@ param (
     $arch = @("amd64")
 )
 
-dir env:
-
 # If the base directory does not exist, create it
 if (!(Test-Path -Path $BasePath)) {
     Write-Output ("Creating output dir: {0}" -f $BasePath)

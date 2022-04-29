@@ -22,6 +22,7 @@ func main() {
 	var include []string
 	var includeList string
 	var path string
+	var quote bool
 	var replaceCharacter string
 
 	// declare the command line flags
@@ -29,6 +30,7 @@ func main() {
 	flag.StringVar(&excludeList, "e", "", "Comma delimited list of variables to exclude from the file")
 	flag.StringVar(&includeList, "i", "", "Comma delimited list of variables to include in the envfile")
 	flag.StringVar(&path, "p", "envfile", "Specify the path to the envfile")
+	flag.BoolVar(&quote, "q", false, "If the value contains spaces quote it")
 	flag.StringVar(&replaceCharacter, "r", " ", "Character to replace newlines with")
 
 	// parse the flags
@@ -43,8 +45,13 @@ func main() {
 	builder = strings.Builder{}
 
 	// turn the lists into a slice
-	exclude = strings.Split(excludeList, ",")
-	include = strings.Split(includeList, ",")
+	if excludeList != "" {
+		exclude = strings.Split(excludeList, ",")
+	}
+
+	if includeList != "" {
+		include = strings.Split(includeList, ",")
+	}
 
 	// Determine the path to the envfile
 	// If it is not absolute, then prepend the current dir onto it
@@ -62,6 +69,7 @@ func main() {
 	}
 
 	// get all the environment variables and iterate around them
+	spacePattern := regexp.MustCompile(`\s`)
 	for _, env := range os.Environ() {
 
 		// split the environment variable using = as the delimiter
@@ -73,13 +81,23 @@ func main() {
 
 		// Determine if the variable should be excluded
 		shouldExclude := sliceContains(exclude, name)
-		shouldInclude := sliceContains(include, name)
-		if shouldExclude && !shouldInclude {
+
+		shouldInclude := true
+		if len(include) > 0 {
+			shouldInclude = sliceContains(include, name)
+		}
+
+		if shouldExclude || !shouldInclude {
 			continue
 		}
 
 		// replace the newline character with a space
 		value := strings.Replace(parts[1], "\n", replaceCharacter, -1)
+
+		// If the value has spaces in it then quote it
+		if spacePattern.MatchString(value) {
+			value = fmt.Sprintf("\"%s\"", value)
+		}
 
 		// Add the key and the value to the string builder
 		builder.WriteString(fmt.Sprintf("%s=%s\n", name, value))
@@ -113,10 +131,9 @@ func sliceContains(slice []string, value string) bool {
 		// match the value against the re
 		result = re.MatchString(value)
 
-		// if strings.EqualFold(x, value) {
-		// 	result = true
-		// 	break
-		// }
+		if result {
+			break
+		}
 	}
 
 	return result

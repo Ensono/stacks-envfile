@@ -20,11 +20,12 @@ The command has three arguments, as described below:
 
 | Argument | Default | Description |
 |---|---|---|
-| `-p` | envfile | The path to the resultant envfile that is created |
-| `-i` | | Comma delimited list of variables that should be included in the file |
-| `-e` | | Comma delimited list of variables that should be excluded from the output |
-| `-r` | " " | The character to replace newlines with |
 | `-d` | false | Output to the console as well as the file |
+| `-e` | | Comma delimited list of variables that should be excluded from the output |
+| `-i` | | Comma delimited list of variables that should be included in the file |
+| `-p` | envfile | The path to the resultant envfile that is created |
+| `-q` | false | Quote values that have spaces in them |
+| `-r` | " " | The character to replace newlines with |
 | `-h` | | Display help |
 
 Note that the `-i` and `-e` options are mutually exclusive. Additionally the values specified are matched case-insensitively.
